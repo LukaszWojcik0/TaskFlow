@@ -16,13 +16,6 @@ export const useTasks = () => {
   };
 
   return { tasks, addTask };
-};
 
+  };
 
-export  const processTask = () => {
-  const [tasks, addTask] = useTasks();
-
-  
-
-  
-}

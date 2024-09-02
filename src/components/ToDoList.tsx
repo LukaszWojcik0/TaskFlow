@@ -1,6 +1,6 @@
 import { Card , CardTitle  } from "@/lib/utils/ui/card";
-import {  Task } from "./processTask";
-import {  useTasks } from "./processTask";
+import {  Task } from "./useTasks";
+import {  useTasks } from "./useTasks";
 import { Button } from "@/lib/utils/ui/button";
 
 export function ToDoList()
@@ -21,13 +21,22 @@ export function ToDoList()
         
     }
     
+    // const handleDeleteTask = () => {
+        
+
+    //     deleteTask(newTask);
+    //     console.log(tasks);
+        
+    // }
+
     return (
         <>
         <Card className="h-screen w-2/5" >
             <CardTitle className="p-4">
                 Your tasks:
             </CardTitle>
-           <Button onClick={handleAddTask} >Dodaj zadanie</Button>
+           <Button onClick={handleAddTask} className="mx-3">Add task</Button>
+           {/* <Button onClick={handleDeleteTask} >Remove task</Button> */}
            
         </Card>
        
