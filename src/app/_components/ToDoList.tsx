@@ -1,16 +1,23 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
 import { useTasks, Task } from "./useTasks";
 import { useState } from "react";
-import { InputTask } from "./InputTask";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardTitle } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog";
+
 export function ToDoList()
 {
     
-    
     const { tasks, addTask } = useTasks();
     const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
-    const [showInputTask, setShowInputTask] = useState(false)
 
     const handleAddTask = () => {
         const newTask: Task = {
@@ -29,14 +36,20 @@ export function ToDoList()
     
     return (
         <>
-        <Card className="h-screen w-2/5" >
+        <Card className="h-screen w-full" >
             <CardTitle className="p-4 flex">
                 Your tasks:
             </CardTitle>
             
-            {showInputTask && <InputTask />}
-
-           <Button onClick={() => {handleAddTask()}} className="mx-3">Add task</Button>
+        
+            <Dialog>
+                <DialogTrigger>Add Task</DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Name your task:</DialogTitle>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
            <ul>
 
             {localTasks.map((task) => (
