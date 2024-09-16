@@ -1,6 +1,6 @@
 "use client";
 import { useTasks, Task } from "./useTasks";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -30,12 +30,14 @@ import Image from "next/image";
 
 export function ToDoList() {
   const { addTask } = useTasks();
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
 
-  const storedTasks =
-    typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
-  const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
-
-  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
+  useEffect(() => {
+    const storedTasks =
+      typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
+    const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
+    setLocalTasks(initialTasks);
+  }, []);
 
   const inputNameRef = useRef<HTMLInputElement>(null);
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
