@@ -18,11 +18,19 @@ import { Input } from "@/components/ui/input";
 
 export function ToDoList() {
   const { tasks, addTask } = useTasks();
-  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+
+  const storedTasks =
+    typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
+  const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
+
+  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
 
   const inputNameRef = useRef<HTMLInputElement>(null);
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
-  //   const inputDescriptionRef = useRef();
+
+  const updateLocalStorage = (tasks: Task[]) => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  };
 
   const handleAddTask = (taskTitle: string, taskDescription: string) => {
     const newTask: Task = {
@@ -33,8 +41,11 @@ export function ToDoList() {
       completed: false,
     };
 
+    const updatedTasks = [...localTasks, newTask];
+    updateLocalStorage(updatedTasks);
+
+    setLocalTasks(updatedTasks);
     addTask(newTask);
-    setLocalTasks([...localTasks, newTask]);
   };
 
   return (
