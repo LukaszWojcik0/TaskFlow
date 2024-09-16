@@ -76,17 +76,15 @@ export function ToDoList() {
               ></Input>
             </div>
             <DialogFooter>
-              <DialogClose>
-                <Button
-                  onClick={() => {
-                    const taskTitle = inputNameRef.current?.value || "";
-                    const taskDescription =
-                      inputDescriptionRef.current?.value || "";
-                    handleAddTask(taskTitle, taskDescription);
-                  }}
-                >
-                  Done
-                </Button>
+              <DialogClose
+                onClick={() => {
+                  const taskTitle = inputNameRef.current?.value || "";
+                  const taskDescription =
+                    inputDescriptionRef.current?.value || "";
+                  handleAddTask(taskTitle, taskDescription);
+                }}
+              >
+                Done
               </DialogClose>
             </DialogFooter>
           </DialogContent>
