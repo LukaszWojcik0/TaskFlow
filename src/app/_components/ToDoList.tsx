@@ -17,7 +17,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 
 export function ToDoList() {
-  const { tasks, addTask } = useTasks();
+  const { addTask } = useTasks();
 
   const storedTasks =
     typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
