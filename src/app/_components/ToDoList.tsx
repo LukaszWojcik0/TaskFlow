@@ -27,6 +27,7 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ToDoList() {
   const { addTask } = useTasks();
@@ -79,49 +80,50 @@ export function ToDoList() {
   };
 
   return (
-    <>
-      <Card className="h-screen w-full">
-        <CardTitle className="p-4 flex">Your tasks:</CardTitle>
+    <Card className="h-screen w-full overflow-hidden">
+      <CardTitle className="p-4 flex">Your tasks:</CardTitle>
 
-        <Dialog>
-          <div className="px-3">
-            <DialogTrigger asChild>
-              <Button className="px-5">Add Task</Button>
-            </DialogTrigger>
+      <Dialog>
+        <div className="p-3 pt-0 border-b">
+          <DialogTrigger asChild>
+            <Button className="px-5">Add Task</Button>
+          </DialogTrigger>
+        </div>
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Name your task:</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Label htmlFor="">Name:</Label>
+            <Input
+              ref={inputNameRef}
+              id="taskName"
+              className="col-span-2"
+            ></Input>
+            <Label htmlFor="">Description:</Label>
+            <Input
+              ref={inputDescriptionRef}
+              id="taskDescription"
+              className="col-span-2"
+            ></Input>
           </div>
+          <DialogFooter>
+            <DialogClose
+              onClick={() => {
+                const taskTitle = inputNameRef.current?.value || "";
+                const taskDescription =
+                  inputDescriptionRef.current?.value || "";
+                handleAddTask(taskTitle, taskDescription);
+              }}
+            >
+              Done
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Name your task:</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Label htmlFor="">Name:</Label>
-              <Input
-                ref={inputNameRef}
-                id="taskName"
-                className="col-span-2"
-              ></Input>
-              <Label htmlFor="">Description:</Label>
-              <Input
-                ref={inputDescriptionRef}
-                id="taskDescription"
-                className="col-span-2"
-              ></Input>
-            </div>
-            <DialogFooter>
-              <DialogClose
-                onClick={() => {
-                  const taskTitle = inputNameRef.current?.value || "";
-                  const taskDescription =
-                    inputDescriptionRef.current?.value || "";
-                  handleAddTask(taskTitle, taskDescription);
-                }}
-              >
-                Done
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <ScrollArea>
         <ul>
           {localTasks.map((task) => (
             <li key={task.id} className="p-4 border-b flex">
@@ -174,7 +176,7 @@ export function ToDoList() {
             </li>
           ))}
         </ul>
-      </Card>
-    </>
+      </ScrollArea>
+    </Card>
   );
 }
