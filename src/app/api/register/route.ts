@@ -28,7 +28,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Registration error:", error);
     if (error instanceof Error && (error as any).code === "23505") {
-      // Unique constraint violation
       return NextResponse.json(
         { message: "Email already in use" },
         { status: 400 }
