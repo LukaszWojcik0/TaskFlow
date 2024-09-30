@@ -15,6 +15,20 @@
       "when": 1726084702691,
       "tag": "0001_busy_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1726581550598,
+      "tag": "0002_cuddly_johnny_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1726597438485,
+      "tag": "0003_parallel_the_fallen",
+      "breakpoints": true
     }
   ]
 }

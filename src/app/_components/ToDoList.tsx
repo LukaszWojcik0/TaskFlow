@@ -1,6 +1,7 @@
 "use client";
-import { useTasks, Task } from "./useTasks";
+import { useTasks } from "./useTasks";
 import { useState, useRef, useEffect } from "react";
+import type { Task } from "./useTasks";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -28,17 +29,26 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { v4 as uuidv4 } from "uuid";
 
-export function ToDoList() {
-  const { addTask } = useTasks();
+export function ToDoList({
+  loggedIn,
+  userId,
+}: {
+  loggedIn: boolean;
+  userId: number;
+}) {
+  const { tasks, addTask, removeTask, updateTask } = useTasks(loggedIn);
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    const storedTasks =
-      typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
-    const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
-    setLocalTasks(initialTasks);
-  }, []);
+    if (!loggedIn) {
+      const storedTasks =
+        typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
+      const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
+      setLocalTasks(initialTasks);
+    }
+  }, [loggedIn]);
 
   const inputNameRef = useRef<HTMLInputElement>(null);
   const inputDescriptionRef = useRef<HTMLInputElement>(null);
@@ -49,35 +59,50 @@ export function ToDoList() {
 
   const handleAddTask = (taskTitle: string, taskDescription: string) => {
     const newTask: Task = {
-      id: Date.now(),
+      id: uuidv4(),
       title: taskTitle,
       description: taskDescription,
       ddl: 12222,
       completed: false,
+      userId: userId,
     };
 
-    const updatedTasks = [...localTasks, newTask];
-    updateLocalStorage(updatedTasks);
-
-    setLocalTasks(updatedTasks);
-    addTask(newTask);
+    if (loggedIn) {
+      addTask(newTask);
+    } else {
+      const updatedTasks = [...localTasks, newTask];
+      updateLocalStorage(updatedTasks);
+      setLocalTasks(updatedTasks);
+    }
   };
 
   const handleDeleteTask = (taskId: string) => {
-    const oldTasks = localStorage.getItem("tasks");
-    if (oldTasks) {
-      const parsedTasks = JSON.parse(oldTasks);
-      const taskNumId = Number(taskId);
-      if (Array.isArray(parsedTasks)) {
-        const updatedTasks = parsedTasks.filter(
-          (task: { id: number }) => task.id !== taskNumId
-        );
-
-        updateLocalStorage(updatedTasks);
-        setLocalTasks(updatedTasks);
+    if (loggedIn) {
+      removeTask(taskId);
+    } else {
+      const oldTasks = localStorage.getItem("tasks");
+      if (oldTasks) {
+        const parsedTasks = JSON.parse(oldTasks);
+        if (Array.isArray(parsedTasks)) {
+          const updatedTasks = parsedTasks.filter((task) => task.id !== taskId);
+          updateLocalStorage(updatedTasks);
+          setLocalTasks(updatedTasks);
+        }
       }
     }
   };
+
+  // const handleUpdateTask = (updatedTask: Task) => {
+  //   if (loggedIn) {
+  //     updateTask(updatedTask);
+  //   } else {
+  //     const updatedTasks = localTasks.map((task) =>
+  //       task.id === updatedTask.id ? updatedTask : task
+  //     );
+  //     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  //     setLocalTasks(updatedTasks);
+  //   }
+  // };
 
   return (
     <Card className="h-screen w-full overflow-hidden">
@@ -125,7 +150,7 @@ export function ToDoList() {
 
       <ScrollArea>
         <ul>
-          {localTasks.map((task) => (
+          {(loggedIn ? tasks : localTasks).map((task) => (
             <li key={task.id} className="p-4 border-b flex">
               <div className="w-10/12">
                 <div className="font-bold">{task.title}</div>
