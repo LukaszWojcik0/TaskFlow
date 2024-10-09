@@ -1,54 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
 import Calendar from "@/app/_components/Calendar";
 import { ToDoList } from "@/app/_components/ToDoList";
 import Navbar from "./_components/Navbar";
-import { WelcomePage } from "./_components/WelcomePage";
+import { useQuery } from "@tanstack/react-query";
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
+async function fetchUser() {
+  const response = await fetch("/api/me");
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
 
 function Home() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+    retry: false,
+  });
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("/api/me");
-        const data = await response.json();
-        if (data.loggedIn) {
-          setLoggedIn(true);
-          setUserId(data.user.id);
-        } else {
-          setLoggedIn(false);
-          setUserId(null);
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-        setLoggedIn(false);
-        setUserId(null);
-      }
-    };
+  const loggedIn = data?.loggedIn ?? false;
+  const userId: number | null = loggedIn ? data?.user?.id ?? null : null;
 
-    checkLoginStatus();
-  }, []);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error loading user data.</div>;
+  }
 
   return (
     <>
       <Navbar />
-      {loggedIn && userId !== null ? (
-        <div className="flex">
-          <div className="w-1/4 ">
-            <ToDoList loggedIn={loggedIn} userId={userId} />
-          </div>
-          <div className="w-3/4">
-            <Calendar />
-          </div>
+
+      <div className="flex">
+        <div className="w-1/4">
+          <ToDoList loggedIn={loggedIn} userId={userId} />
         </div>
-      ) : (
-        <WelcomePage />
-      )}
+        <div className="w-3/4">
+          <Calendar />
+        </div>
+      </div>
     </>
   );
 }

@@ -36,7 +36,7 @@ export function ToDoList({
   userId,
 }: {
   loggedIn: boolean;
-  userId: number;
+  userId: number | null;
 }) {
   const { tasks, addTask, removeTask, updateTask } = useTasks(loggedIn);
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
@@ -64,7 +64,7 @@ export function ToDoList({
       description: taskDescription,
       ddl: 12222,
       completed: false,
-      userId: userId,
+      userId: userId ?? -1,
     };
 
     if (loggedIn) {
