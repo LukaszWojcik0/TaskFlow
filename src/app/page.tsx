@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Calendar from "@/app/_components/Calendar";
 import { ToDoList } from "@/app/_components/ToDoList";
 import Navbar from "./_components/Navbar";
@@ -14,6 +14,13 @@ async function fetchUser() {
   return response.json();
 }
 
+interface Event {
+  title: string;
+  startTime: string;
+  date: string;
+  duration: number;
+}
+
 function Home() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["user"],
@@ -23,6 +30,17 @@ function Home() {
 
   const loggedIn = data?.loggedIn ?? false;
   const userId: number | null = loggedIn ? data?.user?.id ?? null : null;
+  const [events, setEvents] = useState<Event[]>([]);
+
+  const addEventToCalendar = (
+    task: { title: string },
+    date: string,
+    startTime: string,
+    duration: number
+  ) => {
+    const newEvent: Event = { title: task.title, date, startTime, duration };
+    setEvents((prevEvents) => [...prevEvents, newEvent]);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -38,10 +56,14 @@ function Home() {
 
       <div className="flex">
         <div className="w-1/4">
-          <ToDoList loggedIn={loggedIn} userId={userId} />
+          <ToDoList
+            loggedIn={loggedIn}
+            userId={userId}
+            addEventToCalendar={addEventToCalendar}
+          />
         </div>
         <div className="w-3/4">
-          <Calendar />
+          <Calendar events={events} />
         </div>
       </div>
     </>
