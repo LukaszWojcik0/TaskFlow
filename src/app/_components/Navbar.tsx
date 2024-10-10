@@ -28,8 +28,12 @@ const Navbar: React.FC = () => {
 
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
+
+    localStorage.removeItem("tasks");
+
     setLoggedIn(false);
     setUserEmail("");
+    window.location.reload();
   };
 
   return (

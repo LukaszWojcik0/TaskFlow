@@ -34,19 +34,32 @@ import { v4 as uuidv4 } from "uuid";
 export function ToDoList({
   loggedIn,
   userId,
+  addEventToCalendar,
 }: {
   loggedIn: boolean;
   userId: number | null;
+  addEventToCalendar: (
+    task: Task,
+    date: string,
+    startTime: string,
+    duration: number
+  ) => void;
 }) {
   const { tasks, addTask, removeTask, updateTask } = useTasks(loggedIn);
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [date, setDate] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [duration, setDuration] = useState<number>(60);
 
   useEffect(() => {
     if (!loggedIn) {
-      const storedTasks =
-        typeof window !== "undefined" ? localStorage.getItem("tasks") : null;
+      const storedTasks = localStorage.getItem("tasks");
       const initialTasks = storedTasks ? JSON.parse(storedTasks) : [];
       setLocalTasks(initialTasks);
+    } else {
+      localStorage.removeItem("tasks");
+      setLocalTasks([]);
     }
   }, [loggedIn]);
 
@@ -104,6 +117,14 @@ export function ToDoList({
   //   }
   // };
 
+  const handleAddToCalendar = () => {
+    if (selectedTask && date && startTime) {
+      addEventToCalendar(selectedTask, date, startTime, duration);
+      removeTask(selectedTask.id);
+      setSelectedTask(null);
+    }
+  };
+
   return (
     <Card className="h-screen w-full overflow-hidden">
       <CardTitle className="p-4 flex">Your tasks:</CardTitle>
@@ -136,9 +157,9 @@ export function ToDoList({
           <DialogFooter>
             <DialogClose
               onClick={() => {
-                const taskTitle = inputNameRef.current?.value || "";
+                const taskTitle = inputNameRef.current?.value ?? "";
                 const taskDescription =
-                  inputDescriptionRef.current?.value || "";
+                  inputDescriptionRef.current?.value ?? "";
                 handleAddTask(taskTitle, taskDescription);
               }}
             >
@@ -189,14 +210,52 @@ export function ToDoList({
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-
-              <Image
-                src="assets/calendar-add-svgrepo-com.svg"
-                width={30}
-                height={30}
-                alt="add-calendar-img"
-                className="hover:cursor-pointer"
-              ></Image>
+              {/* adding to calendar */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Image
+                    src="assets/calendar-add-svgrepo-com.svg"
+                    width={30}
+                    height={30}
+                    alt="add-calendar-img"
+                    className="hover:cursor-pointer"
+                    onClick={() => setSelectedTask(task)}
+                  ></Image>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      Add &quot;{selectedTask?.title}&quot; to Calendar
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Label htmlFor="date">Select Date:</Label>
+                    <Input
+                      type="date"
+                      id="date"
+                      onChange={(e) => setDate(e.target.value)}
+                    />
+                    <Label htmlFor="startTime">Select Start Time:</Label>
+                    <Input
+                      type="time"
+                      id="startTime"
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                    <Label htmlFor="duration">Duration (minutes):</Label>
+                    <Input
+                      type="number"
+                      id="duration"
+                      value={duration}
+                      onChange={(e) => setDuration(Number(e.target.value))}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <DialogClose onClick={handleAddToCalendar}>
+                      Add to Calendar
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               {/* <img></img> later to be "add to calendar" icon */}
             </li>
           ))}

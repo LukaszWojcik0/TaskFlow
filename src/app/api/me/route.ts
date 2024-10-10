@@ -1,4 +1,3 @@
-// /api/me/route.ts
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { db } from "@/db/db";
@@ -37,7 +36,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ loggedIn: false }, { status: 200 });
     }
   } catch (error) {
-    console.error("Error verifying token:", error);
-    return NextResponse.json({ loggedIn: false }, { status: 200 });
+    if (error instanceof jwt.TokenExpiredError) {
+      const response = NextResponse.json({ loggedIn: false }, { status: 200 });
+      response.cookies.set("token", "", {
+        httpOnly: true,
+        expires: new Date(0),
+        path: "/",
+      });
+      return response;
+    } else {
+      console.error("Error verifying token:", error);
+      return NextResponse.json({ loggedIn: false }, { status: 200 });
+    }
   }
 }
