@@ -3,7 +3,6 @@ import { db } from "@/db/db";
 import { tasks } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { jwtVerify } from "jose";
-import { v4 as uuidv4 } from "uuid";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
@@ -75,32 +74,26 @@ export async function POST(request: Request) {
             description: task.description,
             ddl: task.ddl,
             completed: task.completed,
+            movedToCalendar: task.movedToCalendar,
+            startTime: task.startTime ?? null,
+            date: task.date ?? null,
+            duration: task.duration ?? null,
           })
           .where(and(eq(tasks.id, task.id), eq(tasks.userId, userId)));
+      } else {
+        await db.insert(tasks).values({
+          id: task.id,
+          userId: userId,
+          title: task.title,
+          description: task.description,
+          ddl: task.ddl,
+          completed: task.completed,
+          movedToCalendar: task.movedToCalendar,
+          startTime: task.startTime ?? null,
+          date: task.date ?? null,
+          duration: task.duration ?? null,
+        });
       }
-    }
-    const newTasks = userTasks.filter(
-      (task: any) => !existingTasks.find((t) => t.id === task.id)
-    );
-    for (const newTask of newTasks) {
-      await db.insert(tasks).values({
-        id: newTask.id || uuidv4(),
-        userId: userId,
-        title: newTask.title,
-        description: newTask.description,
-        ddl: newTask.ddl,
-        completed: newTask.completed,
-      });
-    }
-
-    const taskIdsInRequest = userTasks.map((task: any) => task.id);
-    const tasksToDelete = existingTasks.filter(
-      (task) => !taskIdsInRequest.includes(task.id)
-    );
-    for (const taskToDelete of tasksToDelete) {
-      await db
-        .delete(tasks)
-        .where(and(eq(tasks.id, taskToDelete.id), eq(tasks.userId, userId)));
     }
 
     return NextResponse.json(

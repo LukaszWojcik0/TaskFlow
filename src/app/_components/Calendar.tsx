@@ -10,13 +10,18 @@ import {
   getPrevWeek,
 } from "@/app/_utils/dateUtils";
 import { Button } from "@/components/ui/button";
-
-interface Event {
-  title: string;
-  startTime: string;
-  date: string;
-  duration: number;
-}
+import type { Task } from "./useTasks";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@radix-ui/react-label";
 
 const daysOfWeek = [
   "Monday",
@@ -47,9 +52,20 @@ const calculateEndTime = (
     .padStart(2, "0")}`;
 };
 
-const Calendar: React.FC<{ events: Event[] }> = ({ events }) => {
+const Calendar: React.FC<{
+  tasks: Task[];
+  updateTask: (task: Task) => void;
+  removeFromCalendar: (task: Task) => void;
+}> = ({ tasks, updateTask, removeFromCalendar }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"month" | "week">("week");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editedTitle, setEditedTitle] = useState<string>("");
+  const [editedDate, setEditedDate] = useState<string>("");
+  const [editedTime, setEditedTime] = useState<string>("");
+  const [editedDuration, setEditedDuration] = useState<number>(60);
+
+  const events = tasks.filter((task) => task.movedToCalendar);
 
   const handleNext = () => {
     setCurrentDate(
@@ -67,9 +83,34 @@ const Calendar: React.FC<{ events: Event[] }> = ({ events }) => {
     );
   };
 
-  // const toggleViewMode = () => {
-  //   setViewMode(viewMode === "month" ? "week" : "month");
-  // };
+  const handleTaskEdit = (task: Task) => {
+    setSelectedTask(task);
+    setEditedTitle(task.title);
+    setEditedDate(task.date ?? "");
+    setEditedTime(task.startTime ?? "00:00");
+    setEditedDuration(task.duration ?? 60);
+  };
+
+  const handleSaveChanges = () => {
+    if (selectedTask) {
+      const updatedTask = {
+        ...selectedTask,
+        title: editedTitle,
+        date: editedDate,
+        startTime: editedTime,
+        duration: editedDuration,
+      };
+      updateTask(updatedTask);
+      setSelectedTask(null);
+    }
+  };
+
+  const handleMoveFromCalendar = () => {
+    if (selectedTask) {
+      removeFromCalendar(selectedTask);
+      setSelectedTask(null);
+    }
+  };
 
   const days =
     viewMode === "month"
@@ -112,7 +153,6 @@ const Calendar: React.FC<{ events: Event[] }> = ({ events }) => {
             <div className="h-full grid grid-rows-24">
               {hours.map((hour) => (
                 <div key={hour} className="relative h-14">
-                  {/* Adjusted positioning for perfect alignment */}
                   <span className="absolute -top-2 -left-1 text-xs">
                     {hour}
                   </span>
@@ -149,35 +189,95 @@ const Calendar: React.FC<{ events: Event[] }> = ({ events }) => {
                       (event) => event.date === formatDate(day, "yyyy-MM-dd")
                     )
                     .map((event, i) => {
-                      // Parse hours and minutes from the startTime
                       const [hours, minutes] = event.startTime
                         .split(":")
                         .map(Number);
-                      // Calculate top position based on hours and minutes
+
                       const topPosition = hours * 3.5 + (minutes / 60) * 3.5;
-                      const heightInHours = event.duration / 60; // Convert minutes to hours
-                      const heightInRem = heightInHours * 3.5; // 3.5rem per hour
+                      const heightInHours = event.duration / 60;
+                      const heightInRem = heightInHours * 3.5;
                       const endTime = calculateEndTime(
                         event.startTime,
                         event.duration
                       );
 
                       return (
-                        <div
-                          key={i}
-                          className="absolute bg-blue-400 p-1 rounded text-xs z-20 w-[85%] overflow-hidden "
-                          style={{
-                            top: `${topPosition}rem`,
-                            height: `${heightInRem}rem`,
-                          }}
-                        >
-                          <p className="text-white font-semibold">
-                            {event.title}{" "}
-                          </p>
-                          <p className="text-white">
-                            {event.startTime} - {endTime}
-                          </p>
-                        </div>
+                        <Dialog key={i}>
+                          <DialogTrigger asChild>
+                            <div
+                              // key={i}
+                              className="absolute bg-blue-400 p-1 rounded text-xs z-20 w-[85%] overflow-hidden cursor-pointer"
+                              style={{
+                                top: `${topPosition}rem`,
+                                height: `${heightInRem}rem`,
+                              }}
+                              onClick={() => handleTaskEdit(event)}
+                            >
+                              <p className="text-white font-semibold">
+                                {event.title}{" "}
+                              </p>
+                              <p className="text-white">
+                                {event.startTime} - {endTime}
+                              </p>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Edit Task</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <Label>Title:</Label>
+                              <Input
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                              />
+                              <Label>Date:</Label>
+                              <Input
+                                type="date"
+                                value={editedDate}
+                                onChange={(e) => setEditedDate(e.target.value)}
+                              />
+                              <Label>Time:</Label>
+                              <Input
+                                type="time"
+                                value={editedTime}
+                                onChange={(e) => setEditedTime(e.target.value)}
+                              />
+                              <Label>Duration (minutes):</Label>
+                              <Input
+                                type="number"
+                                value={editedDuration}
+                                onChange={(e) =>
+                                  setEditedDuration(Number(e.target.value))
+                                }
+                              />
+                            </div>
+                            <DialogFooter>
+                              <DialogClose>
+                                <Button
+                                  type="submit"
+                                  variant="outline"
+                                  onClick={handleSaveChanges}
+                                >
+                                  Save Changes
+                                </Button>
+                              </DialogClose>
+                              <DialogClose>
+                                <Button
+                                  variant="outline"
+                                  onClick={handleMoveFromCalendar}
+                                >
+                                  Move to ToDoList
+                                </Button>
+                              </DialogClose>
+                              <DialogClose>
+                                <Button variant="outline" type="button">
+                                  Close
+                                </Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       );
                     })}
                 </div>

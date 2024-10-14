@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Calendar from "@/app/_components/Calendar";
 import { ToDoList } from "@/app/_components/ToDoList";
 import Navbar from "./_components/Navbar";
 import { useQuery } from "@tanstack/react-query";
+import { useTasks } from "./_components/useTasks";
 
 async function fetchUser() {
   const response = await fetch("/api/me");
@@ -12,13 +13,6 @@ async function fetchUser() {
     throw new Error("Network response was not ok");
   }
   return response.json();
-}
-
-interface Event {
-  title: string;
-  startTime: string;
-  date: string;
-  duration: number;
 }
 
 function Home() {
@@ -30,17 +24,15 @@ function Home() {
 
   const loggedIn = data?.loggedIn ?? false;
   const userId: number | null = loggedIn ? data?.user?.id ?? null : null;
-  const [events, setEvents] = useState<Event[]>([]);
 
-  const addEventToCalendar = (
-    task: { title: string },
-    date: string,
-    startTime: string,
-    duration: number
-  ) => {
-    const newEvent: Event = { title: task.title, date, startTime, duration };
-    setEvents((prevEvents) => [...prevEvents, newEvent]);
-  };
+  const {
+    tasks,
+    addTask,
+    removeTask,
+    updateTask,
+    addToCalendar,
+    removeFromCalendar,
+  } = useTasks(loggedIn);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -59,11 +51,18 @@ function Home() {
           <ToDoList
             loggedIn={loggedIn}
             userId={userId}
-            addEventToCalendar={addEventToCalendar}
+            tasks={tasks}
+            addEventToCalendar={addToCalendar}
+            addTask={addTask}
+            removeTask={removeTask}
           />
         </div>
         <div className="w-3/4">
-          <Calendar events={events} />
+          <Calendar
+            tasks={tasks}
+            updateTask={updateTask}
+            removeFromCalendar={removeFromCalendar}
+          />
         </div>
       </div>
     </>

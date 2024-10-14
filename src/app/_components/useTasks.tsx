@@ -1,5 +1,4 @@
 "use client";
-// useTasks.tsx
 import { useState, useEffect } from "react";
 
 export interface Task {
@@ -9,12 +8,15 @@ export interface Task {
   ddl: number;
   completed: boolean;
   userId: number;
+  movedToCalendar: boolean;
+  startTime?: string;
+  date?: string;
+  duration?: number;
 }
 
 export const useTasks = (loggedIn: boolean) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  //get tasks from the database on initial load user is logged in
   useEffect(() => {
     if (loggedIn) {
       const fetchTasksFromDb = async () => {
@@ -33,7 +35,6 @@ export const useTasks = (loggedIn: boolean) => {
     }
   }, [loggedIn]);
 
-  //save tasks into db every time they change
   const saveTasks = async (updatedTasks: Task[]) => {
     if (loggedIn) {
       try {
@@ -49,24 +50,54 @@ export const useTasks = (loggedIn: boolean) => {
     }
   };
 
-  //add task
   const addTask = (newTask: Task) => {
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     saveTasks(updatedTasks);
   };
 
-  //remove task
   const removeTask = (taskId: string) => {
-    const updatedTasks = tasks.filter((task) => task.id !== taskId);
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId ? { ...task, movedToCalendar: true } : task
+    );
     setTasks(updatedTasks);
     saveTasks(updatedTasks);
   };
 
-  //update task
   const updateTask = (updatedTask: Task) => {
     const updatedTasks = tasks.map((task) =>
       task.id === updatedTask.id ? updatedTask : task
+    );
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const getCalendarEvents = () => {
+    return tasks.filter((task) => task.movedToCalendar);
+  };
+
+  const getToDoTasks = () => {
+    return tasks.filter((task) => !task.movedToCalendar);
+  };
+
+  const addToCalendar = (
+    task: Task,
+    date: string,
+    startTime: string,
+    duration: number
+  ) => {
+    const updatedTasks = tasks.map((t) =>
+      t.id === task.id
+        ? { ...t, movedToCalendar: true, date, startTime, duration }
+        : t
+    );
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
+  const removeFromCalendar = (task: Task) => {
+    const updatedTasks = tasks.map((t) =>
+      t.id === task.id ? { ...t, movedToCalendar: false } : t
     );
     setTasks(updatedTasks);
     saveTasks(updatedTasks);
@@ -81,5 +112,14 @@ export const useTasks = (loggedIn: boolean) => {
     }
   }, [loggedIn]);
 
-  return { tasks, addTask, removeTask, updateTask };
+  return {
+    tasks,
+    addTask,
+    removeTask,
+    updateTask,
+    getCalendarEvents,
+    getToDoTasks,
+    addToCalendar,
+    removeFromCalendar,
+  };
 };
