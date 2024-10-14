@@ -22,6 +22,10 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  movedToCalendar: boolean("moved_to_calendar").notNull().default(false),
+  startTime: text("start_time"),
+  date: text("date"),
+  duration: integer("duration"),
 });
 
 export type Task = InferSelectModel<typeof tasks>;

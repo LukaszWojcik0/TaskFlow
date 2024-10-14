@@ -1,5 +1,4 @@
 "use client";
-import { useTasks } from "./useTasks";
 import { useState, useRef, useEffect } from "react";
 import type { Task } from "./useTasks";
 
@@ -31,21 +30,28 @@ import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { v4 as uuidv4 } from "uuid";
 
-export function ToDoList({
-  loggedIn,
-  userId,
-  addEventToCalendar,
-}: {
+interface ToDoListProps {
   loggedIn: boolean;
   userId: number | null;
+  tasks: Task[];
   addEventToCalendar: (
     task: Task,
     date: string,
     startTime: string,
     duration: number
   ) => void;
-}) {
-  const { tasks, addTask, removeTask, updateTask } = useTasks(loggedIn);
+  addTask: (task: Task) => void;
+  removeTask: (taskId: string) => void;
+}
+
+export function ToDoList({
+  loggedIn,
+  userId,
+  tasks,
+  addEventToCalendar,
+  addTask,
+  removeTask,
+}: ToDoListProps) {
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [date, setDate] = useState<string>("");
@@ -78,6 +84,10 @@ export function ToDoList({
       ddl: 12222,
       completed: false,
       userId: userId ?? -1,
+      movedToCalendar: false,
+      startTime: undefined,
+      date: undefined,
+      duration: undefined,
     };
 
     if (loggedIn) {
@@ -104,23 +114,11 @@ export function ToDoList({
       }
     }
   };
-
-  // const handleUpdateTask = (updatedTask: Task) => {
-  //   if (loggedIn) {
-  //     updateTask(updatedTask);
-  //   } else {
-  //     const updatedTasks = localTasks.map((task) =>
-  //       task.id === updatedTask.id ? updatedTask : task
-  //     );
-  //     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-  //     setLocalTasks(updatedTasks);
-  //   }
-  // };
+  const tasksToDisplay = tasks.filter((task) => !task.movedToCalendar);
 
   const handleAddToCalendar = () => {
     if (selectedTask && date && startTime) {
       addEventToCalendar(selectedTask, date, startTime, duration);
-      removeTask(selectedTask.id);
       setSelectedTask(null);
     }
   };
@@ -128,14 +126,12 @@ export function ToDoList({
   return (
     <Card className="h-screen w-full overflow-hidden">
       <CardTitle className="p-4 flex">Your tasks:</CardTitle>
-
       <Dialog>
         <div className="p-3 pt-0 border-b">
           <DialogTrigger asChild>
             <Button className="px-5">Add Task</Button>
           </DialogTrigger>
         </div>
-
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Name your task:</DialogTitle>
@@ -171,7 +167,7 @@ export function ToDoList({
 
       <ScrollArea>
         <ul>
-          {(loggedIn ? tasks : localTasks).map((task) => (
+          {(loggedIn ? tasksToDisplay : localTasks).map((task) => (
             <li key={task.id} className="p-4 border-b flex">
               <div className="w-10/12">
                 <div className="font-bold">{task.title}</div>
@@ -256,7 +252,6 @@ export function ToDoList({
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-              {/* <img></img> later to be "add to calendar" icon */}
             </li>
           ))}
         </ul>
