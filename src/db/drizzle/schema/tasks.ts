@@ -1,13 +1,14 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
+  boolean,
+  integer,
   pgTable,
   text,
   timestamp,
-  varchar,
-  integer,
-  boolean,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
+
 import { users } from "./users";
 
 export const tasks = pgTable("tasks", {

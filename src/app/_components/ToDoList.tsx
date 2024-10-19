@@ -1,18 +1,12 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-import type { Task } from "./useTasks";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import type { ToDoListProps } from "@/types/components";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { Label } from "@radix-ui/react-label";
+import { v4 as uuidv4 } from "uuid";
+
+import type { Task } from "./useTasks";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,25 +18,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Label } from "@radix-ui/react-label";
+import { Button } from "@/components/ui/button";
+import { Card, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { v4 as uuidv4 } from "uuid";
-
-interface ToDoListProps {
-  loggedIn: boolean;
-  userId: number | null;
-  tasks: Task[];
-  addEventToCalendar: (
-    task: Task,
-    date: string,
-    startTime: string,
-    duration: number
-  ) => void;
-  addTask: (task: Task) => void;
-  removeTask: (taskId: string) => void;
-}
 
 export function ToDoList({
   loggedIn,
@@ -58,6 +46,11 @@ export function ToDoList({
   const [startTime, setStartTime] = useState<string>("");
   const [duration, setDuration] = useState<number>(60);
 
+  const inputNameRef = useRef<HTMLInputElement>(null);
+  const inputDescriptionRef = useRef<HTMLInputElement>(null);
+
+  const tasksToDisplay = tasks.filter((task) => !task.movedToCalendar);
+
   useEffect(() => {
     if (!loggedIn) {
       const storedTasks = localStorage.getItem("tasks");
@@ -68,9 +61,6 @@ export function ToDoList({
       setLocalTasks([]);
     }
   }, [loggedIn]);
-
-  const inputNameRef = useRef<HTMLInputElement>(null);
-  const inputDescriptionRef = useRef<HTMLInputElement>(null);
 
   const updateLocalStorage = (tasks: Task[]) => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -89,7 +79,6 @@ export function ToDoList({
       date: undefined,
       duration: undefined,
     };
-
     if (loggedIn) {
       addTask(newTask);
     } else {
@@ -114,7 +103,6 @@ export function ToDoList({
       }
     }
   };
-  const tasksToDisplay = tasks.filter((task) => !task.movedToCalendar);
 
   const handleAddToCalendar = () => {
     if (selectedTask && date && startTime) {
@@ -125,9 +113,9 @@ export function ToDoList({
 
   return (
     <Card className="h-screen w-full overflow-hidden">
-      <CardTitle className="p-4 flex">Your tasks:</CardTitle>
+      <CardTitle className="flex p-4">Your tasks:</CardTitle>
       <Dialog>
-        <div className="p-3 pt-0 border-b">
+        <div className="border-b p-3 pt-0">
           <DialogTrigger asChild>
             <Button className="px-5">Add Task</Button>
           </DialogTrigger>
@@ -168,7 +156,7 @@ export function ToDoList({
       <ScrollArea>
         <ul>
           {(loggedIn ? tasksToDisplay : localTasks).map((task) => (
-            <li key={task.id} className="p-4 border-b flex">
+            <li key={task.id} className="flex border-b p-4">
               <div className="w-10/12">
                 <div className="font-bold">{task.title}</div>
                 <div>{task.description}</div>

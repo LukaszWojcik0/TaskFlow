@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
+import { jwtVerify } from "jose";
+
+import { Task } from "@/app/_components/useTasks";
 import { db } from "@/db/db";
 import { tasks } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { jwtVerify } from "jose";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
@@ -12,7 +14,7 @@ function parseCookies(cookieHeader: string | null) {
     cookieHeader.split(";").map((cookie) => {
       const [name, ...rest] = cookie.trim().split("=");
       return [name, rest.join("=")];
-    })
+    }),
   );
 }
 
@@ -37,7 +39,7 @@ export async function GET(request: Request) {
     console.error("Error fetching tasks:", error);
     return NextResponse.json(
       { message: "Error fetching tasks" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -59,10 +61,22 @@ export async function POST(request: Request) {
     if (isNaN(userId)) {
       throw new Error("Invalid user ID");
     }
+
     const existingTasks = await db
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId));
+
+    const incomingTaskIds = userTasks.map((task: Task) => task.id);
+    const tasksToDelete = existingTasks.filter(
+      (existingTask) => !incomingTaskIds.includes(existingTask.id),
+    );
+
+    for (const taskToDelete of tasksToDelete) {
+      await db
+        .delete(tasks)
+        .where(and(eq(tasks.id, taskToDelete.id), eq(tasks.userId, userId)));
+    }
 
     for (const task of userTasks) {
       const existingTask = existingTasks.find((t) => t.id === task.id);
@@ -98,13 +112,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { message: "Tasks synchronized successfully" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error saving tasks:", error);
     return NextResponse.json(
       { message: "Error saving tasks" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

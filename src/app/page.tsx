@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import Calendar from "@/app/_components/Calendar";
 import { ToDoList } from "@/app/_components/ToDoList";
+
 import Navbar from "./_components/Navbar";
-import { useQuery } from "@tanstack/react-query";
 import { useTasks } from "./_components/useTasks";
 
 async function fetchUser() {
@@ -23,7 +25,7 @@ function Home() {
   });
 
   const loggedIn = data?.loggedIn ?? false;
-  const userId: number | null = loggedIn ? data?.user?.id ?? null : null;
+  const userId: number | null = loggedIn ? (data?.user?.id ?? null) : null;
 
   const {
     tasks,

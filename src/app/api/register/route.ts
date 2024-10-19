@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+
 import { db } from "@/db/db";
 import { users } from "@/db/schema";
-import bcrypt from "bcrypt";
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
@@ -23,14 +24,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { message: "User registered successfully", user: newUser[0] },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Registration error:", error);
-    if (error instanceof Error && (error as any).code === "23505") {
+    if (
+      error instanceof Error &&
+      (error as { code?: string }).code === "23505"
+    ) {
       return NextResponse.json(
         { message: "Email already in use" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     return NextResponse.json({ message: "An error occurred" }, { status: 500 });

@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Task {
   id: string;
@@ -15,105 +16,85 @@ export interface Task {
 }
 
 export const useTasks = (loggedIn: boolean) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (loggedIn) {
-      const fetchTasksFromDb = async () => {
-        try {
-          const response = await fetch("/api/tasks", {
-            credentials: "include",
-          });
-          const data = await response.json();
-          setTasks(data.tasks || []);
-        } catch (error) {
-          console.error("Error fetching tasks from DB:", error);
-        }
-      };
-
-      fetchTasksFromDb();
-    }
-  }, [loggedIn]);
-
-  const saveTasks = async (updatedTasks: Task[]) => {
-    if (loggedIn) {
-      try {
-        await fetch("/api/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ tasks: updatedTasks }),
-        });
-      } catch (error) {
-        console.error("Error saving tasks to DB:", error);
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ["tasks", loggedIn],
+    queryFn: async () => {
+      if (!loggedIn) return [];
+      const response = await fetch("/api/tasks", { credentials: "include" });
+      if (!response.ok) {
+        throw new Error("Error fetching tasks from DB");
       }
-    }
-  };
+      const data = await response.json();
+      return data.tasks || [];
+    },
+    enabled: loggedIn,
+  });
+
+  const saveTasksMutation = useMutation({
+    mutationFn: async (updatedTasks: Task[]) => {
+      await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ tasks: updatedTasks }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
 
   const addTask = (newTask: Task) => {
     const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    saveTasks(updatedTasks);
+    saveTasksMutation.mutate(updatedTasks);
   };
 
   const removeTask = (taskId: string) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === taskId ? { ...task, movedToCalendar: true } : task
-    );
-    setTasks(updatedTasks);
-    saveTasks(updatedTasks);
+    const updatedTasks = tasks.filter((task: Task) => task.id !== taskId);
+    saveTasksMutation.mutate(updatedTasks);
   };
 
   const updateTask = (updatedTask: Task) => {
-    const updatedTasks = tasks.map((task) =>
-      task.id === updatedTask.id ? updatedTask : task
+    const updatedTasks = tasks.map((task: Task) =>
+      task.id === updatedTask.id ? updatedTask : task,
     );
-    setTasks(updatedTasks);
-    saveTasks(updatedTasks);
+    saveTasksMutation.mutate(updatedTasks);
   };
 
   const getCalendarEvents = () => {
-    return tasks.filter((task) => task.movedToCalendar);
+    return tasks.filter((task: Task) => task.movedToCalendar);
   };
 
   const getToDoTasks = () => {
-    return tasks.filter((task) => !task.movedToCalendar);
+    return tasks.filter((task: Task) => !task.movedToCalendar);
   };
 
   const addToCalendar = (
     task: Task,
     date: string,
     startTime: string,
-    duration: number
+    duration: number,
   ) => {
-    const updatedTasks = tasks.map((t) =>
+    const updatedTasks: Task[] = tasks.map((t: Task) =>
       t.id === task.id
         ? { ...t, movedToCalendar: true, date, startTime, duration }
-        : t
+        : t,
     );
-    setTasks(updatedTasks);
-    saveTasks(updatedTasks);
+    saveTasksMutation.mutate(updatedTasks);
   };
 
   const removeFromCalendar = (task: Task) => {
-    const updatedTasks = tasks.map((t) =>
-      t.id === task.id ? { ...t, movedToCalendar: false } : t
+    const updatedTasks: Task[] = tasks.map((t: Task) =>
+      t.id === task.id ? { ...t, movedToCalendar: false } : t,
     );
-    setTasks(updatedTasks);
-    saveTasks(updatedTasks);
+    saveTasksMutation.mutate(updatedTasks);
   };
-
-  //update tasks in localStorage
-  useEffect(() => {
-    if (!loggedIn) {
-      const storedTasks = localStorage.getItem("tasks");
-      const parsedTasks = storedTasks ? JSON.parse(storedTasks) : [];
-      setTasks(parsedTasks);
-    }
-  }, [loggedIn]);
 
   return {
     tasks,
+    isLoading,
     addTask,
     removeTask,
     updateTask,

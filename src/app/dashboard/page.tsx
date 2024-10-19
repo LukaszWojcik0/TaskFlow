@@ -1,8 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
+import { jwtVerify } from "jose";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { jwtVerify } from "jose";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
@@ -83,17 +85,17 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Dashboard</h1>
+      <h1 className="mb-6 text-center text-2xl font-bold">Dashboard</h1>
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Change Email</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleEmailChange}>
-            <label className="block mb-2">Current Email: {userEmail}</label>
+            <label className="mb-2 block">Current Email: {userEmail}</label>
             <input
               type="email"
-              className="border border-gray-300 p-2 rounded w-full mb-4"
+              className="mb-4 w-full rounded border border-gray-300 p-2"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               placeholder="Enter new email"
@@ -117,7 +119,7 @@ const Dashboard = () => {
           <form onSubmit={handlePasswordChange}>
             <input
               type="password"
-              className="border border-gray-300 p-2 rounded w-full mb-4"
+              className="mb-4 w-full rounded border border-gray-300 p-2"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter new password"

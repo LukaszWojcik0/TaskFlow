@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db/db";
-import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { jwtVerify } from "jose";
+
+import { db } from "@/db/db";
+import { users } from "@/db/schema";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
