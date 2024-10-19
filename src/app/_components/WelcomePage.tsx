@@ -5,10 +5,10 @@ export function WelcomePage() {
     <div className="absolute z-10 h-full w-full p-24">
       <Card className="p-4">
         <div>
-          <p className="text-4xl font-bold text-center mt-4">
+          <p className="mt-4 text-center text-4xl font-bold">
             Welcome to TaskFlow!
           </p>
-          <p className="text-2xl text-center">
+          <p className="text-center text-2xl">
             Please log in to access your tasks and calendar.
           </p>
         </div>

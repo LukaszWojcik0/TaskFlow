@@ -1,48 +1,37 @@
 "use client";
+
 import React, { useState } from "react";
-import {
-  getMonthDetails,
-  getWeekDetails,
-  formatDate,
-  getNextMonth,
-  getPrevMonth,
-  getNextWeek,
-  getPrevWeek,
-} from "@/app/_utils/dateUtils";
-import { Button } from "@/components/ui/button";
-import type { Task } from "./useTasks";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 
-const daysOfWeek = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-const hours = Array.from(
-  { length: 24 },
-  (_, i) => `${i.toString().padStart(2, "0")}:00`
-);
+import type { Task } from "./useTasks";
+import {
+  daysOfWeek,
+  formatDate,
+  getMonthDetails,
+  getNextMonth,
+  getNextWeek,
+  getPrevMonth,
+  getPrevWeek,
+  getWeekDetails,
+  hours,
+} from "@/app/_utils/dateUtils";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const calculateEndTime = (
   startTime: string,
-  durationMinutes: number
+  durationMinutes: number,
 ): string => {
   const [hours, minutes] = startTime.split(":").map(Number);
-
   const endTimeMinutes = hours * 60 + minutes + durationMinutes;
   const endHours = Math.floor(endTimeMinutes / 60) % 24;
   const endMinutes = endTimeMinutes % 60;
@@ -71,7 +60,7 @@ const Calendar: React.FC<{
     setCurrentDate(
       viewMode === "month"
         ? getNextMonth(currentDate)
-        : getNextWeek(currentDate)
+        : getNextWeek(currentDate),
     );
   };
 
@@ -79,7 +68,7 @@ const Calendar: React.FC<{
     setCurrentDate(
       viewMode === "month"
         ? getPrevMonth(currentDate)
-        : getPrevWeek(currentDate)
+        : getPrevWeek(currentDate),
     );
   };
 
@@ -127,7 +116,7 @@ const Calendar: React.FC<{
   };
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
           {formatDate(currentDate, "MMMM yyyy")}
         </h2>
@@ -149,11 +138,11 @@ const Calendar: React.FC<{
       {viewMode === "week" ? (
         <div className="flex h-[calc(24*3.5rem+4rem)]">
           {/* Time labels column */}
-          <div className="w-20 relative border-r pt-16">
-            <div className="h-full grid grid-rows-24">
+          <div className="relative w-20 border-r pt-16">
+            <div className="grid-rows-24 grid h-full">
               {hours.map((hour) => (
                 <div key={hour} className="relative h-14">
-                  <span className="absolute -top-2 -left-1 text-xs">
+                  <span className="absolute -left-1 -top-2 text-xs">
                     {hour}
                   </span>
                   <div className="absolute right-0 w-1/2 border-t"></div>
@@ -163,11 +152,11 @@ const Calendar: React.FC<{
           </div>
 
           {/* Days columns */}
-          <div className="flex-1 grid grid-cols-7">
+          <div className="grid flex-1 grid-cols-7">
             {days.map((day, index) => (
               <div key={day.toString()} className="border-r last:border-r-0">
                 {/* Header */}
-                <div className="text-center font-semibold p-2 border-b h-16 sticky top-0 bg-white z-10">
+                <div className="sticky top-0 z-10 h-16 border-b bg-white p-2 text-center font-semibold">
                   {daysOfWeek[index]}
                   <br />
                   <span className={isToday(day) ? "underline" : ""}>
@@ -177,28 +166,28 @@ const Calendar: React.FC<{
 
                 {/* Hour cells */}
                 <div className="relative">
-                  <div className="grid grid-rows-24">
+                  <div className="grid-rows-24 grid">
                     {hours.map((_, i) => (
-                      <div key={i} className="h-14 border-t relative" />
+                      <div key={i} className="relative h-14 border-t" />
                     ))}
                   </div>
 
                   {/* Events */}
                   {events
                     .filter(
-                      (event) => event.date === formatDate(day, "yyyy-MM-dd")
+                      (event) => event.date === formatDate(day, "yyyy-MM-dd"),
                     )
                     .map((event, i) => {
-                      const [hours, minutes] = event.startTime
+                      const [hours, minutes] = (event.startTime ?? "00:00")
                         .split(":")
                         .map(Number);
 
                       const topPosition = hours * 3.5 + (minutes / 60) * 3.5;
-                      const heightInHours = event.duration / 60;
+                      const heightInHours = (event.duration ?? 60) / 60;
                       const heightInRem = heightInHours * 3.5;
                       const endTime = calculateEndTime(
-                        event.startTime,
-                        event.duration
+                        event.startTime ?? "00:00",
+                        event.duration ?? 60,
                       );
 
                       return (
@@ -206,14 +195,14 @@ const Calendar: React.FC<{
                           <DialogTrigger asChild>
                             <div
                               // key={i}
-                              className="absolute bg-blue-400 p-1 rounded text-xs z-20 w-[85%] overflow-hidden cursor-pointer"
+                              className="absolute z-20 w-[85%] cursor-pointer overflow-hidden rounded bg-blue-400 p-1 text-xs"
                               style={{
                                 top: `${topPosition}rem`,
                                 height: `${heightInRem}rem`,
                               }}
                               onClick={() => handleTaskEdit(event)}
                             >
-                              <p className="text-white font-semibold">
+                              <p className="font-semibold text-white">
                                 {event.title}{" "}
                               </p>
                               <p className="text-white">
@@ -286,7 +275,7 @@ const Calendar: React.FC<{
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 grid-cols-7">
+        <div className="grid grid-cols-7 gap-4">
           {daysOfWeek.map((day) => (
             <div key={day} className="bg-gray-200 p-2 text-center font-bold">
               {day}

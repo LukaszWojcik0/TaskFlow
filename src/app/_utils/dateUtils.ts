@@ -1,14 +1,14 @@
 import {
-  format,
   addMonths,
-  subMonths,
   addWeeks,
-  subWeeks,
-  startOfWeek,
-  endOfWeek,
   eachDayOfInterval,
-  startOfMonth,
   endOfMonth,
+  endOfWeek,
+  format,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+  subWeeks,
 } from "date-fns";
 
 export const getMonthDetails = (date: Date) => {
@@ -21,6 +21,21 @@ export const getMonthDetails = (date: Date) => {
 
   return days;
 };
+
+export const hours = Array.from(
+  { length: 24 },
+  (_, i) => `${i.toString().padStart(2, "0")}:00`,
+);
+
+export const daysOfWeek = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 export const getWeekDetails = (date: Date) => {
   const start = startOfWeek(date, { weekStartsOn: 1 }); // Week starts on Monday

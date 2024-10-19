@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
+
 import { db } from "@/db/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY!;
 
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
     if (user) {
       return NextResponse.json(
         { loggedIn: true, user: { id: user.id, email: user.email } },
-        { status: 200 }
+        { status: 200 },
       );
     } else {
       return NextResponse.json({ loggedIn: false }, { status: 200 });

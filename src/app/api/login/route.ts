@@ -1,10 +1,10 @@
-// /api/login/route.ts
 import { NextResponse } from "next/server";
-import { users } from "@/db/schema";
-import { db } from "@/db/db";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
 import { SignJWT } from "jose";
+
+import { db } from "@/db/db";
+import { users } from "@/db/schema";
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json(
       { message: "Logged in successfully" },
-      { status: 200 }
+      { status: 200 },
     );
 
     response.cookies.set("token", token, {
