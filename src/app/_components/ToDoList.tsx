@@ -32,6 +32,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { useTasks } from "./useTasks";
+
 export function ToDoList({
   loggedIn,
   userId,
@@ -40,10 +42,14 @@ export function ToDoList({
   addTask,
   removeTask,
 }: ToDoListProps) {
+  const { updateTask } = useTasks(loggedIn);
+
   const [localTasks, setLocalTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [date, setDate] = useState<string>("");
   const [startTime, setStartTime] = useState<string>("");
+  const [taskTitle, setTaskTitle] = useState<string>("");
+  const [taskDecription, setTaskDecription] = useState<string>("");
   const [duration, setDuration] = useState<number>(60);
 
   const inputNameRef = useRef<HTMLInputElement>(null);
@@ -114,6 +120,27 @@ export function ToDoList({
     }
   };
 
+  const handleTaskChanges = (taskId: string) => {
+    if (selectedTask) {
+      const updatedTask = {
+        ...selectedTask,
+        title: taskTitle || selectedTask.title,
+        description: taskDecription || selectedTask.description,
+      };
+
+      if (loggedIn) {
+        updateTask(updatedTask);
+      } else {
+        const updatedTasks = localTasks.map((task) =>
+          task.id === taskId ? updatedTask : task,
+        );
+        setLocalTasks(updatedTasks);
+        updateLocalStorage(updatedTasks);
+      }
+      setSelectedTask(null);
+    }
+  };
+
   return (
     <Card className="h-screen w-full overflow-hidden">
       <CardTitle className="flex p-4">Your tasks:</CardTitle>
@@ -165,6 +192,55 @@ export function ToDoList({
                 <div>{task.description}</div>
               </div>
 
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Image
+                    src="assets/edit-2-svgrepo-com.svg"
+                    width={25}
+                    height={25}
+                    alt="edit-img"
+                    className="hover:cursor-pointer"
+                    onClick={() => {
+                      setSelectedTask(task);
+                      console.log(task);
+                    }}
+                  ></Image>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      Edit &quot;{selectedTask?.title}&quot;
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Label htmlFor="taskTitle">Change title:</Label>
+                    <Input
+                      type="text"
+                      id="taskTitle"
+                      placeholder={task.title}
+                      onChange={(e) => setTaskTitle(e.target.value)}
+                    />
+                    <Label htmlFor="taskDecription">Change description:</Label>
+                    <Input
+                      type="text"
+                      id="taskDecription"
+                      placeholder={task.description}
+                      onChange={(e) => setTaskDecription(e.target.value)}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <DialogClose
+                      onClick={() => {
+                        if (selectedTask) {
+                          handleTaskChanges(selectedTask.id);
+                        }
+                      }}
+                    >
+                      Save changes
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Image
