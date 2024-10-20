@@ -82,15 +82,20 @@ const Calendar: React.FC<{
 
   const handleSaveChanges = () => {
     if (selectedTask) {
+      const [startHours, startMinutes] = editedTime.split(":").map(Number);
+      const maxDuration = (24 - startHours) * 60 - startMinutes;
+      const adjustedDuration = Math.min(editedDuration, maxDuration);
+
       const updatedTask = {
         ...selectedTask,
         title: editedTitle,
         date: editedDate,
         startTime: editedTime,
-        duration: editedDuration,
+        duration: adjustedDuration,
       };
       updateTask(updatedTask);
       setSelectedTask(null);
+      setEditedDuration(adjustedDuration);
     }
   };
 
@@ -194,7 +199,6 @@ const Calendar: React.FC<{
                         <Dialog key={i}>
                           <DialogTrigger asChild>
                             <div
-                              // key={i}
                               className="absolute z-20 w-[85%] cursor-pointer overflow-hidden rounded bg-blue-400 p-1 text-xs"
                               style={{
                                 top: `${topPosition}rem`,
@@ -236,9 +240,18 @@ const Calendar: React.FC<{
                               <Input
                                 type="number"
                                 value={editedDuration}
-                                onChange={(e) =>
-                                  setEditedDuration(Number(e.target.value))
-                                }
+                                onChange={(e) => {
+                                  const [startHours, startMinutes] = editedTime
+                                    .split(":")
+                                    .map(Number);
+                                  const maxDuration =
+                                    (24 - startHours) * 60 - startMinutes;
+                                  const newDuration = Math.min(
+                                    Number(e.target.value),
+                                    maxDuration,
+                                  );
+                                  setEditedDuration(newDuration);
+                                }}
                               />
                             </div>
                             <DialogFooter>

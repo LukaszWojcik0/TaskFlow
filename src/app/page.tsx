@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import Calendar from "@/app/_components/Calendar";
 import { ToDoList } from "@/app/_components/ToDoList";
@@ -37,7 +38,11 @@ function Home() {
   } = useTasks(loggedIn);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-16 w-16 animate-spin" />
+      </div>
+    );  
   }
 
   if (isError) {

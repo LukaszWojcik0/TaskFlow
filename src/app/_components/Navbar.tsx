@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -34,14 +35,6 @@ const Navbar: React.FC = () => {
     window.location.reload();
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isError) {
-    return <div>Error loading user data.</div>;
-  }
-
   return (
     <div className="bg-primary p-4 text-primary-foreground">
       <div className="container mx-auto flex items-center justify-between">
@@ -49,10 +42,23 @@ const Navbar: React.FC = () => {
           TaskFlow
         </Link>
 
-        {loggedIn ? (
+        {isLoading ? (
+          <div className="flex items-center space-x-4">
+            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+          </div>
+        ) : isError ? (
+          <div>Error loading user data.</div>
+        ) : loggedIn ? (
           <div className="flex space-x-4">
             <div className="flex items-center">
-              <span className="mr-4">Welcome, {userEmail}</span>
+              <span className="mr-4 flex items-center">
+                Welcome,{" "}
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  userEmail
+                )}
+              </span>
               <Button
                 onClick={handleLogout}
                 variant="destructive"
