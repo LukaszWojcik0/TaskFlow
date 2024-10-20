@@ -106,7 +106,10 @@ export function ToDoList({
 
   const handleAddToCalendar = () => {
     if (selectedTask && date && startTime) {
-      addEventToCalendar(selectedTask, date, startTime, duration);
+      const [startHours, startMinutes] = startTime.split(":").map(Number);
+      const maxDuration = (24 - startHours) * 60 - startMinutes;
+      const adjustedDuration = Math.min(duration, maxDuration);
+      addEventToCalendar(selectedTask, date, startTime, adjustedDuration);
       setSelectedTask(null);
     }
   };
@@ -230,7 +233,18 @@ export function ToDoList({
                       type="number"
                       id="duration"
                       value={duration}
-                      onChange={(e) => setDuration(Number(e.target.value))}
+                      onChange={(e) => {
+                        const [startHours, startMinutes] = startTime
+                          .split(":")
+                          .map(Number);
+                        const maxDuration =
+                          (24 - startHours) * 60 - startMinutes;
+                        const newDuration = Math.min(
+                          Number(e.target.value),
+                          maxDuration,
+                        );
+                        setDuration(newDuration);
+                      }}
                     />
                   </div>
                   <DialogFooter>
