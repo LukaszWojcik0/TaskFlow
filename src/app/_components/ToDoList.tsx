@@ -142,7 +142,7 @@ export function ToDoList({
   };
 
   return (
-    <Card className="h-screen w-full overflow-hidden">
+    <Card className="flex h-[calc(100vh-70px)] flex-col">
       <CardTitle className="flex p-4">Your tasks:</CardTitle>
       <Dialog>
         <div className="border-b p-3 pt-0">
@@ -183,7 +183,7 @@ export function ToDoList({
         </DialogContent>
       </Dialog>
 
-      <ScrollArea>
+      <div className="max-h-[calc(100vh-{HERE INSERT}] overflow-y-auto">
         <ul>
           {(loggedIn ? tasksToDisplay : localTasks).map((task) => (
             <li key={task.id} className="flex border-b p-4">
@@ -333,7 +333,7 @@ export function ToDoList({
             </li>
           ))}
         </ul>
-      </ScrollArea>
+      </div>
     </Card>
   );
 }

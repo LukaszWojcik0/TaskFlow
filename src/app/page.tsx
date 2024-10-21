@@ -42,7 +42,7 @@ function Home() {
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin" />
       </div>
-    );  
+    );
   }
 
   if (isError) {
@@ -50,11 +50,11 @@ function Home() {
   }
 
   return (
-    <>
+    <div className="flex h-screen flex-col overflow-y-hidden">
       <Navbar />
 
-      <div className="flex">
-        <div className="w-1/4">
+      <div className="flex flex-grow">
+        <div className="h-full w-1/4">
           <ToDoList
             loggedIn={loggedIn}
             userId={userId}
@@ -64,7 +64,7 @@ function Home() {
             removeTask={removeTask}
           />
         </div>
-        <div className="w-3/4">
+        <div className="h-full w-3/4">
           <Calendar
             tasks={tasks}
             updateTask={updateTask}
@@ -72,7 +72,7 @@ function Home() {
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
