@@ -10,6 +10,8 @@ import { ToDoList } from "@/app/_components/ToDoList";
 import Navbar from "./_components/Navbar";
 import { useTasks } from "./_components/useTasks";
 
+import WelcomePopUp from "./_components/WelcomePopUp";
+
 async function fetchUser() {
   const response = await fetch("/api/me");
   if (!response.ok) {
@@ -49,10 +51,18 @@ function Home() {
     return <div>Error loading user data.</div>;
   }
 
+
+
+
+
   return (
     <div className="flex h-screen flex-col overflow-y-hidden">
       <Navbar />
-
+      
+      {/* <div className="absolute w-screen h-[calc(100vh-270px)] ">
+      <WelcomePopUp/>
+      </div> */}
+      
       <div className="flex flex-grow">
         <div className="h-full w-1/4">
           <ToDoList
