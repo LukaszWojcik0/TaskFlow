@@ -51,7 +51,8 @@ function Home() {
     return <div>Error loading user data.</div>;
   }
 
-
+  // const welcomeCookie = WelcomePopUp.getCookie()
+  // if ()
 
 
 
@@ -61,8 +62,8 @@ function Home() {
       
       {/* <div className="absolute w-screen h-[calc(100vh-270px)] ">
       <WelcomePopUp/>
-      </div> */}
-      
+      </div>
+       */}
       <div className="flex flex-grow">
         <div className="h-full w-1/4">
           <ToDoList
