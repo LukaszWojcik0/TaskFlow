@@ -30,7 +30,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { useTasks } from "./useTasks";
 
@@ -112,10 +111,7 @@ export function ToDoList({
 
   const handleAddToCalendar = () => {
     if (selectedTask && date && startTime) {
-      const [startHours, startMinutes] = startTime.split(":").map(Number);
-      const maxDuration = (24 - startHours) * 60 - startMinutes;
-      const adjustedDuration = Math.min(duration, maxDuration);
-      addEventToCalendar(selectedTask, date, startTime, adjustedDuration);
+      addEventToCalendar(selectedTask, date, startTime, duration);
       setSelectedTask(null);
     }
   };
@@ -309,18 +305,8 @@ export function ToDoList({
                       type="number"
                       id="duration"
                       value={duration}
-                      onChange={(e) => {
-                        const [startHours, startMinutes] = startTime
-                          .split(":")
-                          .map(Number);
-                        const maxDuration =
-                          (24 - startHours) * 60 - startMinutes;
-                        const newDuration = Math.min(
-                          Number(e.target.value),
-                          maxDuration,
-                        );
-                        setDuration(newDuration);
-                      }}
+                      min={1}
+                      onChange={(e) => setDuration(Number(e.target.value))}
                     />
                   </div>
                   <DialogFooter>

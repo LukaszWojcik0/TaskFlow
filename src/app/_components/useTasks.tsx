@@ -30,6 +30,7 @@ export const useTasks = (loggedIn: boolean) => {
       return data.tasks || [];
     },
     enabled: loggedIn,
+    staleTime: 1000 * 60 * 5,
   });
 
   const saveTasksMutation = useMutation({
