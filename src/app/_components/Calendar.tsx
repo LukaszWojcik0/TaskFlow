@@ -113,6 +113,15 @@ const Calendar: React.FC<{
     setIsEditDialogOpen(true);
   };
 
+  const getTasksForDay = (date: Date) => {
+    return tasks.filter((task) => task.date === formatDate(date, "yyyy-MM-dd"));
+  };
+
+  const switchToWeekView = (day: Date) => {
+    setCurrentDate(day);
+    setViewMode("week");
+  };
+
   return (
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
@@ -383,20 +392,86 @@ const Calendar: React.FC<{
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-4">
+          <div className="grid grid-cols-7 rounded-xl border-l border-t">
             {daysOfWeek.map((day) => (
-              <div key={day} className="bg-gray-200 p-2 text-center font-bold">
+              <div
+                key={day}
+                className="border-b border-r bg-gray-100 p-2 text-center font-bold first:rounded-tl-xl last:rounded-tr-xl"
+              >
                 {day}
               </div>
             ))}
             {days.map((day) => (
-              <div key={day.toString()} className="border p-4 text-center">
+              <div
+                key={day.toString()}
+                className={`min-h-48 border-b border-r p-2 text-left ${
+                  isToday(day) ? "bg-blue-100" : "bg-white"
+                }`}
+              >
                 <div
-                  className={`text-lg font-bold ${
-                    isToday(day) ? "underline" : ""
+                  onClick={() => switchToWeekView(day)}
+                  className={`cursor-pointer text-center text-lg font-semibold ${
+                    isToday(day) ? "text-blue-500" : ""
                   }`}
                 >
                   {formatDate(day, "d")}
+                </div>
+
+                <div className="mt-2 text-sm">
+                  {getTasksForDay(day).map((task) => (
+                    <Popover key={task.id}>
+                      <PopoverTrigger asChild>
+                        <div className="cursor-pointer text-xs hover:underline">
+                          <span className="font-semibold">
+                            {task.startTime}
+                          </span>{" "}
+                          - {task.title}
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-80"
+                        side="right"
+                        align="start"
+                        sideOffset={5}
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">
+                            {task.title}
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenEditDialog(task)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm">
+                            <span className="font-medium">Date:</span>{" "}
+                            {formatDate(new Date(task.date!), "MMMM d, yyyy")}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Start Time:</span>{" "}
+                            {task.startTime}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">End Time:</span>{" "}
+                            {calculateEndTime(task.startTime!, task.duration!)}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Duration:</span>{" "}
+                            {formatDuration(task.duration!)}
+                          </p>
+                          <p>
+                            <span className="font-medium">Description:</span>{" "}
+                            {task.description}
+                          </p>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  ))}
                 </div>
               </div>
             ))}
