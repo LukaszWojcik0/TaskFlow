@@ -40,15 +40,11 @@ export default function WelcomePopUp() {
   const { setCookie, getCookie } = useCookie();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!getCookie("firstVisit")) {
-        setCookie("firstVisit", "true", 30);
-        setIsFirst(true);
-      }
-      setIsVisible(true);
-    }, 500);
-
-    return () => clearTimeout(timer); // Cleanup timer on component unmount
+    if (!getCookie("firstVisit")) {
+      setCookie("firstVisit", "true", 30);
+      setIsFirst(true);
+    }
+    setIsVisible(true);
   }, [getCookie, setCookie]);
 
   function handleCloseWelcome() {
