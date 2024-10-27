@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import Cookies from 'js-cookie';
+import { useState } from "react";
+import Cookies from "js-cookie";
 
 export const useCookie = () => {
   const [cookieValue, setCookieValue] = useState<string | undefined>(undefined);
