@@ -57,43 +57,11 @@ export default function WelcomePopUp() {
   }
 
   return (
-    // <Card className="absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/4 z-20">
-    //     <CardHeader>
-    //         <CardTitle>
-    //         Welcome to <b>TaskFlow</b>!
-    //         </CardTitle>
-    //         <CardDescription>
-    //         Login to access your flow! Don&apos;t have an account yet? Create one!
-
-    //         </CardDescription>
-    //     </CardHeader>
-
-    //     <CardContent className="mx-auto flex flex-shrink">
-    //         <div className="mx-auto px-1">
-    //             <Button
-    //     asChild
-    //     variant="destructive"
-    //     className="bg-blue-500 font-bold hover:bg-blue-600"
-    //     >
-    //     <Link href="/login">Log In</Link>
-    //   </Button>
-    //       </div><div className="mx-auto px-1">
-
-    //   <Button
-    //     asChild
-    //     variant="destructive"
-    //     className="bg-blue-500 font-bold hover:bg-blue-600"
-    //     >
-    //     <Link href="/signup">Sign up</Link>
-    //   </Button>
-    //       </div>
-    //     </CardContent>
-    // </Card>
     <>
       {isVisible && !loggedIn && isFirst && (
         <div
           id="first_welcome"
-          className="absolute z-20 flex h-screen w-screen items-center justify-center bg-black bg-opacity-30"
+          className="absolute z-[60] flex h-screen w-screen items-center justify-center bg-black bg-opacity-30"
         >
           <div className="mx-auto flex h-1/3 w-1/2 flex-col items-center justify-center rounded-2xl border-solid border-slate-600 bg-white">
             <p className="text-3xl">
